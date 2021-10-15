@@ -1,0 +1,1 @@
+# quarkus-azure-functions-oidc-workaround
