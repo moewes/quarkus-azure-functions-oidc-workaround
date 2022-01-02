@@ -61,9 +61,9 @@ public class BaseFunction {
         deploymentStatus = error.toString();
     }
 
-    protected HttpResponseMessage dispatch(HttpRequestMessage<Optional<String>> request) {
+    protected HttpResponseMessage dispatch(HttpRequestMessage<Optional<String>> request, boolean patch) {
         try {
-            return nettyDispatch(request);
+            return nettyDispatch(request, patch);
         } catch (Exception e) {
             e.printStackTrace();
             return request
@@ -71,7 +71,7 @@ public class BaseFunction {
         }
     }
 
-    protected HttpResponseMessage nettyDispatch(HttpRequestMessage<Optional<String>> request)
+    protected HttpResponseMessage nettyDispatch(HttpRequestMessage<Optional<String>> request, boolean patch)
             throws Exception {
         String path = request.getUri().getRawPath();
         String query = request.getUri().getRawQuery();
@@ -81,8 +81,14 @@ public class BaseFunction {
         if (request.getUri().getPort() != -1) {
             host = host + ':' + request.getUri().getPort();
         }
-        DefaultHttpRequest nettyRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1,
-                HttpMethod.valueOf(request.getHttpMethod().name()), path);
+        DefaultHttpRequest nettyRequest;
+        if (patch) {
+             nettyRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1,
+                    HttpMethod.valueOf("PATCH"), path);
+        } else {
+             nettyRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1,
+                    HttpMethod.valueOf(request.getHttpMethod().name()), path);
+        }
         nettyRequest.headers().set("Host", host);
         for (Map.Entry<String, String> header : request.getHeaders().entrySet()) {
             nettyRequest.headers().add(header.getKey(), header.getValue());

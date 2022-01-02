@@ -23,6 +23,21 @@ public class Function extends BaseFunction {
                             deploymentStatus.getBytes(StandardCharsets.UTF_8));
             return responseBuilder.build();
         }
-        return dispatch(request);
+        return dispatch(request,false);
+    }
+
+    public HttpResponseMessage runPatch(
+            @HttpTrigger(name = "req") HttpRequestMessage<Optional<String>> request,
+            final ExecutionContext context) {
+        if (!started && !bootstrapError) {
+            initQuarkus();
+        }
+        if (bootstrapError) {
+            HttpResponseMessage.Builder responseBuilder = request
+                    .createResponseBuilder(HttpStatus.valueOf(500)).body(
+                            deploymentStatus.getBytes(StandardCharsets.UTF_8));
+            return responseBuilder.build();
+        }
+        return dispatch(request,true);
     }
 }
